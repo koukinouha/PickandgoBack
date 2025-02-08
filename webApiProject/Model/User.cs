@@ -23,6 +23,6 @@ namespace webApiProject.Model
         public role? role { get; set; }
       
         public Profile Profile { get; set; } // Relation un utilisateur a un seul profil
-      
+        public ICollection<Colis> Colis { get; set; } = new List<Colis>();
     }
 }

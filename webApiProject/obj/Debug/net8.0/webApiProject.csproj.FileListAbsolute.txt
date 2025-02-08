@@ -350,3 +350,4 @@ C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\refint\
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\webApiProject.pdb
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\webApiProject.genruntimeconfig.cache
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\ref\webApiProject.dll
+C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\webApiProject.sourcelink.json

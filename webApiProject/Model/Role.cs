@@ -8,6 +8,6 @@ namespace webApiProject.Model
 {
     public enum role
     {
-        Admin, Fournisseur
+        Admin, Fournisseur, Client
     }
 }

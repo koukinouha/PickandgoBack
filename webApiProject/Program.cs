@@ -85,6 +85,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddMemoryCache();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 // Dans Program.cs ou Startup.cs
@@ -93,7 +95,20 @@ builder.Services.AddScoped<AuthRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>(); // Remplacez EmailService par votre implémentation
 
 var app = builder.Build();
+// Créer les rôles s'ils n'existent pas
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roles = new[] { "Admin", "Fournisseur", "Client" };
 
+    foreach (var roleName in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(roleName))
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+}
 // Configurer le pipeline de requêtes HTTP.
 if (app.Environment.IsDevelopment())
 {

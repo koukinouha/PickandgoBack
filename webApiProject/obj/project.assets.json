@@ -5134,6 +5134,7 @@
       "Microsoft.EntityFrameworkCore >= 9.0.1",
       "Microsoft.EntityFrameworkCore.SqlServer >= 9.0.1",
       "Microsoft.EntityFrameworkCore.Tools >= 9.0.1",
+      "Microsoft.Extensions.Caching.Memory >= 9.0.1",
       "Microsoft.SqlServer.Server >= 1.0.0",
       "Swashbuckle.AspNetCore >= 6.4.0"
     ]
@@ -5205,6 +5206,10 @@
           "Microsoft.EntityFrameworkCore.Tools": {
             "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
             "suppressParent": "All",
+            "target": "Package",
+            "version": "[9.0.1, )"
+          },
+          "Microsoft.Extensions.Caching.Memory": {
             "target": "Package",
             "version": "[9.0.1, )"
           },

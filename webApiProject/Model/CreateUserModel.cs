@@ -28,7 +28,8 @@ namespace webApiProject.Model{
         [Required(ErrorMessage = "Le numéro du télephone est requis")]
         [MinLength(8, ErrorMessage = "The password must be at least 8 digits long")]
         public string Phone { get; set; } = string.Empty;
-        public bool IsAdmin { get; set; }
+     
+        public role Role { get; set; }
 
     }
 }
