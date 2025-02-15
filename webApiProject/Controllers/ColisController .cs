@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using System.Security.Claims;
 using webApiProject.Model;
 
 namespace webApiProject.Controllers
@@ -37,7 +37,6 @@ namespace webApiProject.Controllers
             return colis;
         }
 
-        // POST: api/Colis
         [HttpPost]
         public async Task<ActionResult<Colis>> PostColis(Colis colis)
         {
@@ -49,6 +48,23 @@ namespace webApiProject.Controllers
 
             // Initialiser l'annulation par défaut à "false"
             colis.Annulation = false;
+
+            // Récupérer l'ID de l'utilisateur connecté
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return Unauthorized("Utilisateur non authentifié.");
+            }
+
+            // Convertir l'ID de l'utilisateur en int
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return BadRequest("L'ID de l'utilisateur est invalide.");
+            }
+
+            // Assigner l'ID de l'utilisateur au colis
+            colis.UserId = userId; // Assurez-vous que la propriété UserId existe dans votre modèle Colis
 
             _context.Colis.Add(colis);
             await _context.SaveChangesAsync();
@@ -123,5 +139,31 @@ namespace webApiProject.Controllers
 
             return NoContent();
         }
+        [HttpGet("MyColis")]
+        public async Task<ActionResult<IEnumerable<Colis>>> GetColisForCurrentUser()
+        {
+            // Récupérer l'ID de l'utilisateur connecté
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdString))
+            {
+                return Unauthorized("Utilisateur non authentifié.");
+            }
+
+            // Convertir l'ID de l'utilisateur en int
+            if (!int.TryParse(userIdString, out int userId))
+            {
+                return BadRequest("L'ID de l'utilisateur est invalide.");
+            }
+
+            // Récupérer les colis associés à l'utilisateur connecté
+            var colisList = await _context.Colis
+                .Where(c => c.UserId == userId) // Filtrer par UserId (int)
+                .ToListAsync();
+
+            return colisList;
+        }
+
     }
+
 }

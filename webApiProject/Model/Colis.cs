@@ -40,10 +40,9 @@ namespace webApiProject.Model
 
         public bool Annulation { get; set; } // Indique si le colis a été annulé
 
-        public DateTime DateEnlevement { get; set; } // Date d'envoi du colis
+       
         public DateTime DateAjoutColis { get; set; } // Date d'envoi du colis
-        public DateTime DateRetourColis { get; set; }
-        public DateTime remboursment { get; set; }
+    
    
         public int UserId { get; set; } // Clé étrangère pour l'utilisateur
         public User User { get; set; }
