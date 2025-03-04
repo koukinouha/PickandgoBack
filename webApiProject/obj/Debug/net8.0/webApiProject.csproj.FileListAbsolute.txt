@@ -336,6 +336,7 @@ C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\webApiP
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\webApiProject.csproj.CoreCompileInputs.cache
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\webApiProject.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\webApiProject.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\webApiProject.sourcelink.json
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\staticwebassets\msbuild.webApiProject.Microsoft.AspNetCore.StaticWebAssets.props
@@ -350,4 +351,3 @@ C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\refint\
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\webApiProject.pdb
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\webApiProject.genruntimeconfig.cache
 C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\ref\webApiProject.dll
-C:\Users\nouha\source\repos\PickandgoBack\webApiProject\obj\Debug\net8.0\webApiProject.sourcelink.json

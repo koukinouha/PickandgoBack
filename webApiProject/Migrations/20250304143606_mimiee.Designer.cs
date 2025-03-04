@@ -12,8 +12,8 @@ using webApiProject;
 namespace webApiProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250130205340_test2")]
-    partial class test2
+    [Migration("20250304143606_mimiee")]
+    partial class mimiee
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,70 @@ namespace webApiProject.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Colis", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Annulation")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CodeGouvernorat")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Commentaire")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DateAjoutColis")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Delegation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Designation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Echange")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Localite")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NomComplet")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NombreArticles")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Prix")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("StatutLivraison")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Telephone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.ToTable("Colis");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -206,6 +270,7 @@ namespace webApiProject.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("PhoneNumberConfirmed")
@@ -249,6 +314,10 @@ namespace webApiProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ApplicationUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("Cin")
                         .HasColumnType("int");
 
@@ -287,16 +356,20 @@ namespace webApiProject.Migrations
                     b.Property<int>("Tel")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
+                    b.HasIndex("ApplicationUserId")
                         .IsUnique();
 
                     b.ToTable("Profiles");
+                });
+
+            modelBuilder.Entity("Colis", b =>
+                {
+                    b.HasOne("webApiProject.ApplicationUser", null)
+                        .WithMany("Colis")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -352,17 +425,19 @@ namespace webApiProject.Migrations
 
             modelBuilder.Entity("webApiProject.Model.Profile", b =>
                 {
-                    b.HasOne("webApiProject.ApplicationUser", "User")
+                    b.HasOne("webApiProject.ApplicationUser", "ApplicationUser")
                         .WithOne("Profile")
-                        .HasForeignKey("webApiProject.Model.Profile", "UserId")
+                        .HasForeignKey("webApiProject.Model.Profile", "ApplicationUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("ApplicationUser");
                 });
 
             modelBuilder.Entity("webApiProject.ApplicationUser", b =>
                 {
+                    b.Navigation("Colis");
+
                     b.Navigation("Profile")
                         .IsRequired();
                 });

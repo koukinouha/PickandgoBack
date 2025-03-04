@@ -160,16 +160,16 @@ namespace webApiProject.Controllers
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim("UserId", user.Id),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.MobilePhone, user.PhoneNumber),
-                new Claim(ClaimTypes.GivenName, user.FirstName),
-                new Claim(ClaimTypes.Surname, user.LastName)
-            };
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        new Claim(ClaimTypes.NameIdentifier, user.Id), // Claim standard pour l'ID de l'utilisateur
+        new Claim("UserId", user.Id), // Claim personnalisé pour l'ID de l'utilisateur
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.MobilePhone, user.PhoneNumber),
+        new Claim(ClaimTypes.GivenName, user.FirstName),
+        new Claim(ClaimTypes.Surname, user.LastName)
+    };
 
             // Ajouter les rôles de l'utilisateur
             var roles = await _userManager.GetRolesAsync(user);

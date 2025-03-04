@@ -11,7 +11,9 @@ namespace webApiProject
         public string LastName { get; set; }
         public string PhoneNumber { get; set; }
         // Relation avec le profil de l'utilisateur
-        public virtual Profile Profile { get; set; }
+        public Profile Profile { get; set; }
+        
+        public ICollection<Colis> Colis { get; set; } 
         public role Role
         {
             get; set;

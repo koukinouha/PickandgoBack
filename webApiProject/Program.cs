@@ -86,7 +86,10 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddMemoryCache();
-
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ClientOnly", policy => policy.RequireRole("Fournisseur"));
+});
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 // Dans Program.cs ou Startup.cs
