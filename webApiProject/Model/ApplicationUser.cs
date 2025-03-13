@@ -12,7 +12,7 @@ namespace webApiProject
         public string PhoneNumber { get; set; }
         // Relation avec le profil de l'utilisateur
         public Profile Profile { get; set; }
-        
+
         public ICollection<Colis> Colis { get; set; } 
         public role Role
         {

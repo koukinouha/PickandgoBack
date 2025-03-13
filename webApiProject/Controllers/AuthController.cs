@@ -134,7 +134,7 @@ namespace webApiProject.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginModel model)
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
@@ -147,10 +147,25 @@ namespace webApiProject.Controllers
 
                 // Générer le token JWT
                 var tokenString = GenerateJWTToken(user);
-                return Ok(new { token = tokenString });
+
+                // Retourner le corps de l'utilisateur avec le token
+                return Ok(new
+                {
+                    user = new
+                    {
+                        user.Id,
+                        user.UserName,
+                        user.Email,
+                        user.FirstName,
+                        user.LastName,
+                        user.PhoneNumber,
+                        user.IsVerified
+                    },
+                    token = tokenString
+                });
             }
 
-            return Unauthorized();
+            return Unauthorized("Nom d'utilisateur ou mot de passe incorrect.");
         }
 
         private async Task<string> GenerateJWTToken(ApplicationUser user)

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using webApiProject;
 
@@ -11,9 +12,11 @@ using webApiProject;
 namespace webApiProject.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250305142622_tete")]
+    partial class tete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -299,66 +302,6 @@ namespace webApiProject.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("webApiProject.Model.Facture", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AdresseDestinataire")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("AdresseUtilisateur")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CodeGouvernorat")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CodeTVA")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ColisId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Localite")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("MontantTotal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("NomDestinataire")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NomUtilisateur")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("NombreColis")
-                        .HasColumnType("int");
-
-                    b.Property<string>("TelephoneDestinataire")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TelephoneUtilisateur")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ColisId");
-
-                    b.ToTable("Factures");
-                });
-
             modelBuilder.Entity("webApiProject.Model.Profile", b =>
                 {
                     b.Property<int>("Id")
@@ -370,9 +313,6 @@ namespace webApiProject.Migrations
                     b.Property<string>("Adresse")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Cin")
                         .HasColumnType("int");
@@ -412,11 +352,14 @@ namespace webApiProject.Migrations
                     b.Property<int>("Tel")
                         .HasColumnType("int");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId")
-                        .IsUnique()
-                        .HasFilter("[ApplicationUserId] IS NOT NULL");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Profiles");
                 });
@@ -480,23 +423,15 @@ namespace webApiProject.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("webApiProject.Model.Facture", b =>
+            modelBuilder.Entity("webApiProject.Model.Profile", b =>
                 {
-                    b.HasOne("Colis", "Colis")
-                        .WithMany()
-                        .HasForeignKey("ColisId")
+                    b.HasOne("webApiProject.ApplicationUser", "User")
+                        .WithOne("Profile")
+                        .HasForeignKey("webApiProject.Model.Profile", "UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Colis");
-                });
-
-            modelBuilder.Entity("webApiProject.Model.Profile", b =>
-                {
-                    b.HasOne("webApiProject.ApplicationUser", null)
-                        .WithOne("Profile")
-                        .HasForeignKey("webApiProject.Model.Profile", "ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("webApiProject.ApplicationUser", b =>

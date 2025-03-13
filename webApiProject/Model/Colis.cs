@@ -19,9 +19,11 @@ public class Colis
     public bool Echange { get; set; } // Indique si le colis peut être échangé
     public string? Commentaire { get; set; } // Commentaires supplémentaires
     public string StatutLivraison { get; set; } = string.Empty; // Statut de livraison
-    public bool Annulation { get; set; } // Indique si le colis a été annulé
+    public bool Annulation { get; set; } // Indique si le colis a été annulée  
     public DateTime DateAjoutColis { get; set; } // Date d'envoi du colis
     public string? ApplicationUserId { get; set; }
+    // Clé étrangère pour le colis
+   
 }
 
     // Ajoutez cette annotation pour spécifier la clé étrangère

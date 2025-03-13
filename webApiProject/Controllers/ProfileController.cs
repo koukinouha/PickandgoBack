@@ -45,35 +45,64 @@ namespace webApiProject.Controllers
             return profile;
         }
 
-        // PUT: api/Profile/5
         [HttpPut("modifier_profile/{id}")]
         public async Task<IActionResult> PutProfile(int id, Profile profile)
         {
+            // Vérification si l'ID du profil correspond à l'ID passé dans l'URL
             if (id != profile.Id)
             {
-                return BadRequest();
+                return BadRequest("L'ID du profil ne correspond pas à l'ID de l'URL.");
             }
 
-            _context.Entry(profile).State = EntityState.Modified;
+            // Récupérer le profil existant de la base de données
+            var existingProfile = await _context.Profiles.FindAsync(id);
+            if (existingProfile == null)
+            {
+                return NotFound("Profil non trouvé.");
+            }
+
+            // Mise à jour des propriétés du profil existant
+            existingProfile.Nom = profile.Nom;
+            existingProfile.Prenom = profile.Prenom;
+            existingProfile.Email = profile.Email;
+            existingProfile.Tel = profile.Tel;
+            existingProfile.Cin = profile.Cin;
+            existingProfile.Patente = profile.Patente;
+            existingProfile.Adresse = profile.Adresse;
+            existingProfile.LanguePrefere = profile.LanguePrefere;
+            existingProfile.PreferencesCommunication = profile.PreferencesCommunication;
+            existingProfile.ModePaiementPrefere = profile.ModePaiementPrefere;
+            existingProfile.HistoriqueConnexionsActions = profile.HistoriqueConnexionsActions;
+
+            // Marquer l'entité comme modifiée
+            _context.Entry(existingProfile).State = EntityState.Modified;
 
             try
             {
+                // Sauvegarder les modifications dans la base de données
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!ProfileExists(id))
                 {
-                    return NotFound();
+                    return NotFound("Profil non trouvé lors de la mise à jour.");
                 }
                 else
                 {
-                    throw;
+                    throw; // Relancer l'exception si un autre problème se produit
                 }
             }
 
-            return NoContent();
+            return NoContent(); // Retourner un statut 204 No Content
         }
+
+        // Méthode pour vérifier si le profil existe
+        private bool ProfileExists(int id)
+        {
+            return _context.Profiles.Any(e => e.Id == id);
+        }
+
 
         [HttpPost("ajouter-profile")]
         [Authorize]
@@ -160,10 +189,7 @@ namespace webApiProject.Controllers
             return NoContent();
         }
 
-        private bool ProfileExists(int id)
-        {
-            return _context.Profiles.Any(e => e.Id == id);
-        }
+        
 
         private async Task<string> GetUserIdFromTokenAsync()
         {

@@ -20,9 +20,8 @@ namespace webApiProject.Model
         public string HistoriqueConnexionsActions { get; set; } = "Aucune action de connexion enregistrée";
 
         // Relation
-        // Relation
-        [ForeignKey("ApplicationUser")]
-        public string ApplicationUserId { get; set; }
-        public virtual ApplicationUser ApplicationUser { get; set; }
+        public string? ApplicationUserId { get; set; }
+        
+
     }
 }
