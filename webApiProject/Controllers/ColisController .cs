@@ -520,7 +520,38 @@ namespace webApiProject.Controllers
         {
             return _context.Colis.Any(e => e.Id == id);
         }
+
+
+        [HttpGet("paginated")]
+        public async Task<ActionResult<PagedResult<Colis>>> GetColisPaginated(int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                var totalColis = await _context.Colis.CountAsync();
+                var colis = await _context.Colis
+                    .OrderBy(c => c.Id) // Assurez-vous de trier pour une pagination correcte
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                var result = new PagedResult<Colis>
+                {
+                    Items = colis,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalCount = totalColis,
+                    TotalPages = (int)Math.Ceiling((double)totalColis / pageSize)
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
     }
+}
     // GET: api/Colis
 
 
@@ -528,4 +559,4 @@ namespace webApiProject.Controllers
   
 
 
-}
+
