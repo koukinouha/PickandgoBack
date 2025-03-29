@@ -47,7 +47,7 @@ namespace webApiProject.Controllers
                     NomDestinataire = colis.NomComplet,
                     TelephoneDestinataire = colis.Telephone,
                     AdresseDestinataire = colis.Delegation,
-                    CodeTVA = colis.CodeGouvernorat,
+                    CodeTVA = "%",
                     NombreColis = 1, // Utiliser le nombre d'articles du colis
                     MontantTotal = colis.Prix * colis.NombreArticles,
                  
@@ -69,7 +69,7 @@ namespace webApiProject.Controllers
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
         }
-        [HttpGet("user/{userId}")]
+       /** [HttpGet("GetFactureForUser/{userId}")]
         [Authorize(Roles = "Fournisseur, Admin")]
         public async Task<ActionResult<Facture>> GetFactureForUser(string userId)
         {
@@ -116,7 +116,7 @@ namespace webApiProject.Controllers
             {
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
-        }
+        }**/
 
 
         [HttpPut("update/{colisId}")]
