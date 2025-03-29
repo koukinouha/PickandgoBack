@@ -73,7 +73,7 @@ namespace webApiProject.Controllers
                     // Envoyer un e-mail à l'administrateur pour informer de la demande d'inscription
                     await SendAdminNotificationEmail(model.Email, model.Username);
                 }
-                else if (model.Role == role.Client)
+                else if (model.Role == role.Assistante)
                 {
                     // Envoyer un e-mail de confirmation pour les clients
                     await SendClientConfirmationEmail(model.Email);
@@ -87,6 +87,7 @@ namespace webApiProject.Controllers
 
         [HttpPost("validateSupplier/{userId}")]
         [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Assistante")]
         public async Task<IActionResult> ValidateSupplier(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -114,6 +115,7 @@ namespace webApiProject.Controllers
 
         [HttpGet("unverifiedSuppliers")]
         [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Assistante")]
         public async Task<IActionResult> GetUnverifiedSuppliers()
         {
             try
@@ -139,10 +141,16 @@ namespace webApiProject.Controllers
             var user = await _userManager.FindByNameAsync(model.Username);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                // Vérifier si l'utilisateur est un fournisseur ou un client non vérifié
-                if ((await _userManager.IsInRoleAsync(user, role.Fournisseur.ToString()) || await _userManager.IsInRoleAsync(user, role.Client.ToString())) && !user.IsVerified)
+                // Vérifier si l'utilisateur est un fournisseur non vérifié
+                if (await _userManager.IsInRoleAsync(user, role.Fournisseur.ToString()) && !user.IsVerified)
                 {
                     return BadRequest("Votre compte doit être validé par un administrateur avant de pouvoir vous connecter.");
+                }
+
+                // Vérifier si l'utilisateur est un fournisseur validé
+                if (await _userManager.IsInRoleAsync(user, role.Fournisseur.ToString()) && user.IsVerified)
+                {
+                    // Ici, vous pouvez ajouter des logiques spécifiques pour les fournisseurs
                 }
 
                 // Générer le token JWT
@@ -167,6 +175,7 @@ namespace webApiProject.Controllers
 
             return Unauthorized("Nom d'utilisateur ou mot de passe incorrect.");
         }
+
 
         private async Task<string> GenerateJWTToken(ApplicationUser user)
         {
@@ -231,22 +240,26 @@ namespace webApiProject.Controllers
         private async Task SendSupplierConfirmationEmail(string email, string username, string password)
         {
             var subject = "Votre compte fournisseur a été validé";
-            var message = $"Votre compte fournisseur a été validé par l'administrateur.\nNom d'utilisateur : {username}\nMot de passe : {password}";
+            var message = $" Bonjour Mr /Mme : {username} Votre compte fournisseur a été validé par l'administrateur.Bienvenu avec nous Pick And Go .";
 
             await _emailService.SendEmailAsync(email, subject, message);
         }
 
-        [HttpGet("allusers")]
+        [HttpGet("allFournisseur")]
         [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Assistante")]
         public async Task<IActionResult> GetAllUsersByRole()
         {
-            var usersInRole = await _userManager.GetUsersInRoleAsync("Client");
-            // Filtrer les utilisateurs ayant isVerified=false
-            var unverifiedUsers = usersInRole.Where(user => !user.IsVerified).ToList();
-            return Ok(unverifiedUsers);
+            // Récupérer tous les utilisateurs ayant le rôle "Fournisseur"
+            var usersInRole = await _userManager.GetUsersInRoleAsync("Fournisseur");
+
+            // Retourner la liste complète des fournisseurs
+            return Ok(usersInRole);
         }
 
+
         [HttpDelete("deleteUser/{userId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUser(string userId)
         {
             try
@@ -273,20 +286,7 @@ namespace webApiProject.Controllers
             }
         }
 
-        [HttpGet("allclients")]
-        public async Task<IActionResult> GetAllClients()
-        {
-            try
-            {
-                var clients = await _userManager.GetUsersInRoleAsync("Client");
-                return Ok(clients);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Une erreur s'est produite lors de la récupération des clients : {ex.Message}");
-          
-            }
-        }
+       
         [HttpPost("forgotPassword")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordModel model)
         {

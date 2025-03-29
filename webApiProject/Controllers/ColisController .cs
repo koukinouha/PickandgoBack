@@ -71,7 +71,7 @@ namespace webApiProject.Controllers
             return Ok(colisList);
         }
         // GET: api/Colis/total
-        [HttpGet("total")]
+        [HttpGet("Nombre Totale des colis")]
         public async Task<ActionResult<int>> GetnumberTotalColis()
         {
             try
@@ -85,8 +85,44 @@ namespace webApiProject.Controllers
             }
         }
 
+        [HttpGet("nombre-total-colis-utilisateur-connecte")]
+        [Authorize(Roles = "Fournisseur")]// Assurez-vous que l'utilisateur est authentifié
+        public async Task<ActionResult<int>> GetNombreTotalColisUtilisateurConnecte()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var utilisateurId = await GetUserIdFromTokenAsync();
+
+                // Compter le nombre de colis pour l'utilisateur spécifié
+                int totalColis = await _context.Colis.CountAsync(c => c.ApplicationUserId == utilisateurId);
+                return Ok(totalColis);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+        [HttpGet("nombre-total-colis/{utilisateurId}")]
+        [Authorize(Roles = "Admin")] // Assurez-vous que seuls les utilisateurs autorisés peuvent accéder à cette méthode
+        public async Task<ActionResult<int>> GetNombreTotalColisParUtilisateur(string utilisateurId)
+        {
+            try
+            {
+                // Compter le nombre de colis pour l'utilisateur spécifié
+                int totalColis = await _context.Colis.CountAsync(c => c.ApplicationUserId == utilisateurId);
+                return Ok(totalColis);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+
         // GET: api/Colis/total-echange
-        [HttpGet("total-echange")]
+        [HttpGet("total colis en echange")]
         public async Task<ActionResult<int>> GetTotalColisEchange()
         {
             try
@@ -99,8 +135,44 @@ namespace webApiProject.Controllers
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
         }
+
+        [HttpGet("total-colis-echange-utilisateur-connecte")]
+        [Authorize(Roles = "Fournisseur")]// Assurez-vous que l'utilisateur est authentifié
+        public async Task<ActionResult<int>> GetTotalColisEchangeUtilisateurConnecte()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var utilisateurId = await GetUserIdFromTokenAsync();
+
+                // Compter le nombre de colis en échange pour l'utilisateur spécifié
+                int totalColisEchange = await _context.Colis.CountAsync(c => c.ApplicationUserId == utilisateurId && c.Echange);
+                return Ok(totalColisEchange);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+        [HttpGet("total-colis-echange/{utilisateurId}")]
+        [Authorize(Roles = "Admin")] // Assurez-vous que seuls les utilisateurs autorisés peuvent accéder à cette méthode
+        public async Task<ActionResult<int>> GetTotalColisEchangeParUtilisateur(string utilisateurId)
+        {
+            try
+            {
+                // Compter le nombre de colis en échange pour l'utilisateur spécifié
+                int totalColisEchange = await _context.Colis.CountAsync(c => c.ApplicationUserId == utilisateurId && c.Echange);
+                return Ok(totalColisEchange);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
         // GET: api/Colis/colis-echange
-        [HttpGet("colis-echange")]
+        [HttpGet("liste-colis-echange")]
         public async Task<ActionResult<IEnumerable<Colis>>> GetColisEchange()
         {
             try
@@ -149,7 +221,7 @@ namespace webApiProject.Controllers
             }
         }
         // GET: api/Colis/livres
-        [HttpGet("livres")]
+        [HttpGet("Get Total Colis Livres")]
         public async Task<ActionResult<int>> GetTotalColisLivres()
         {
             try
@@ -163,7 +235,7 @@ namespace webApiProject.Controllers
             }
         }
         // GET: api/Colis/en-cours-de-traitement
-        [HttpGet("en-cours-de-traitement")]
+        [HttpGet("totale colis en-cours-de-traitement")]
         public async Task<ActionResult<int>> GetTotalColisEnCoursDeTraitement()
         {
             try
@@ -176,13 +248,83 @@ namespace webApiProject.Controllers
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
         }
+
+        [HttpGet("total-colis-en-cours-de-traitement-for-fournissuer concted")]
+        [Authorize(Roles = "Fournisseur")]
+        public async Task<ActionResult<int>> GetTotalColisEnCoursDeTraitementforFournissuerconcted()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var fournisseurId = await GetUserIdFromTokenAsync();
+
+                // Compter le nombre de colis en cours de traitement pour le fournisseur spécifié
+                int totalEnCoursDeTraitement = await _context.Colis.CountAsync(c => c.ApplicationUserId == fournisseurId && c.StatutLivraison == "EnCoursDeTraitement");
+                return Ok(totalEnCoursDeTraitement);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+        [HttpGet("total-colis-en-cours-de-traitement/{fournisseurId}")]
+        [Authorize(Roles = "Admin")] // Assurez-vous que seuls les utilisateurs autorisés peuvent accéder à cette méthode
+        public async Task<ActionResult<int>> GetTotalColisEnCoursDeTraitementByFournisseur(string fournisseurId)
+        {
+            try
+            {
+                // Compter le nombre de colis en cours de traitement pour le fournisseur spécifié
+                int totalEnCoursDeTraitement = await _context.Colis.CountAsync(c => c.ApplicationUserId == fournisseurId && c.StatutLivraison == "EnCoursDeTraitement");
+                return Ok(totalEnCoursDeTraitement);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+
         // GET: api/Colis/annules
-        [HttpGet("annules")]
+        [HttpGet("Get Total Colis Annules")]
         public async Task<ActionResult<int>> GetTotalColisAnnules()
         {
             try
             {
                 int totalAnnules = await _context.Colis.CountAsync(c => c.StatutLivraison == "Annulé");
+                return Ok(totalAnnules);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+        [HttpGet("Get Total Colis Annules Fournisseur Conncted")]
+        [Authorize(Roles = "Fournisseur")]
+        public async Task<ActionResult<int>> GetTotalColisAnnulesFournisseur()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var fournisseurId = await GetUserIdFromTokenAsync();
+
+                // Compter le nombre de colis annulés pour le fournisseur spécifié
+                int totalAnnules = await _context.Colis.CountAsync(c => c.ApplicationUserId == fournisseurId && c.StatutLivraison == "Annulé");
+                return Ok(totalAnnules);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+        [HttpGet("GetTotalColisAnnulesByFournisseur/{fournisseurId}")]
+        public async Task<ActionResult<int>> GetTotalColisAnnulesByFournisseur(string fournisseurId)
+        {
+            try
+            {
+                // Compter le nombre de colis annulés pour le fournisseur spécifié
+                int totalAnnules = await _context.Colis.CountAsync(c => c.ApplicationUserId == fournisseurId && c.StatutLivraison == "Annulé");
                 return Ok(totalAnnules);
             }
             catch (Exception ex)
@@ -225,6 +367,7 @@ namespace webApiProject.Controllers
                 colis.ApplicationUserId = userId; // Assigner l'ID de l'utilisateur
 
                 colis.DateAjoutColis = DateTime.UtcNow;
+                colis.StatutLivraison = "EnCoursDeTraitement"; // Définir le statut de livraison
 
                 _context.Colis.Add(colis);
                 await _context.SaveChangesAsync();
@@ -243,7 +386,8 @@ namespace webApiProject.Controllers
 
 
 
-        
+
+
 
 
 
@@ -400,8 +544,9 @@ namespace webApiProject.Controllers
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
         }
-        [HttpGet("total-colis-livres-montant")]
+        [HttpGet("total-colis-livres-montant for fournisseur concté")]
         [Authorize(Roles = "Fournisseur")]
+       
         public async Task<IActionResult> GetTotalColisLivresMontant()
         {
             try
@@ -437,8 +582,82 @@ namespace webApiProject.Controllers
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
         }
-        [HttpGet("total-colis-livres-montant-this-month")]
+
+
+        [HttpGet("le total des colis livrés pour tous les utilisateurs")]
+        public async Task<IActionResult> GetTotalColisLivresMontantallUSERS()
+        {
+            try
+            {
+                // Récupérer tous les colis livrés
+                var colisLivres = await _context.Colis
+                    .Where(c => c.StatutLivraison == "Livré")
+                    .ToListAsync();
+
+                if (colisLivres == null || !colisLivres.Any())
+                {
+                    return NotFound("Aucun colis livré trouvé.");
+                }
+
+                // Calculer le montant total des colis livrés
+                var montantTotal = colisLivres.Sum(c => c.Prix);
+
+                return Ok(new
+                {
+                    TotalColisLivres = colisLivres.Count,
+                    MontantTotal = montantTotal
+                });
+            }
+            catch (ApplicationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+
+
+        [HttpGet("total des colis livrés pour un fournisseur spécifique /{fournisseurId}")]
+        public async Task<IActionResult> GetTotalColisLivresMontantByFournisseur(string fournisseurId)
+        {
+            try
+            {
+                // Récupérer les colis livrés pour le fournisseur spécifié
+                var colisLivres = await _context.Colis
+                    .Where(c => c.ApplicationUserId == fournisseurId && c.StatutLivraison == "Livré")
+                    .ToListAsync();
+
+                if (colisLivres == null || !colisLivres.Any())
+                {
+                    return NotFound($"Aucun colis livré trouvé pour le fournisseur avec l'ID {fournisseurId}.");
+                }
+
+                // Calculer le montant total des colis livrés
+                var montantTotal = colisLivres.Sum(c => c.Prix);
+
+                return Ok(new
+                {
+                    TotalColisLivres = colisLivres.Count,
+                    MontantTotal = montantTotal
+                });
+            }
+            catch (ApplicationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+
+        [HttpGet("total-colis-livres-montant-this-month for Fournisseur Conncted")]
         [Authorize(Roles = "Fournisseur")]
+
         public async Task<IActionResult> GetTotalColisLivresMontantThisMonth()
         {
             try
@@ -493,7 +712,86 @@ namespace webApiProject.Controllers
                 });
             }
         }
+        [HttpGet("total-colis-livres-montant-all-users-this-month")]
+        public async Task<IActionResult> GetTotalColisLivresMontantAllUsersThisMonth()
+        {
+            try
+            {
+                // Récupérer le mois et l'année en cours
+                var currentMonth = DateTime.UtcNow.Month;
+                var currentYear = DateTime.UtcNow.Year;
 
+                // Récupérer tous les colis livrés pour le mois en cours
+                var colisLivres = await _context.Colis
+                    .Where(c => c.StatutLivraison == "Livré"
+                            && c.DateAjoutColis.Month == currentMonth
+                            && c.DateAjoutColis.Year == currentYear)
+                    .ToListAsync();
+
+                if (colisLivres == null || !colisLivres.Any())
+                {
+                    return Ok(new
+                    {
+                        TotalColisLivres = 0,
+                        MontantTotal = 0
+                    });
+                }
+
+                // Calculer le montant total des colis livrés
+                var montantTotal = colisLivres.Sum(c => c.Prix);
+
+                return Ok(new
+                {
+                    TotalColisLivres = colisLivres.Count,
+                    MontantTotal = montantTotal
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+        [HttpGet("total-colis-livres-montant-by-fournisseur/{fournisseurId}")]
+        public async Task<IActionResult> GetTotalColisLivresMontantByFournisseurThisMonth(string fournisseurId)
+        {
+            try
+            {
+                // Récupérer le mois et l'année en cours
+                var currentMonth = DateTime.UtcNow.Month;
+                var currentYear = DateTime.UtcNow.Year;
+
+                // Récupérer les colis livrés pour le fournisseur spécifié et le mois en cours
+                var colisLivres = await _context.Colis
+                    .Where(c => c.ApplicationUserId == fournisseurId
+                            && c.StatutLivraison == "Livré"
+                            && c.DateAjoutColis.Month == currentMonth
+                            && c.DateAjoutColis.Year == currentYear)
+                    .ToListAsync();
+
+                if (colisLivres == null || !colisLivres.Any())
+                {
+                    return Ok(new
+                    {
+                        TotalColisLivres = 0,
+                        MontantTotal = 0
+                    });
+                }
+
+                // Calculer le montant total des colis livrés
+                var montantTotal = colisLivres.Sum(c => c.Prix);
+
+                return Ok(new
+                {
+                    TotalColisLivres = colisLivres.Count,
+                    MontantTotal = montantTotal
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
 
 
         // Méthode privée pour récupérer l'ID de l'utilisateur à partir du token
