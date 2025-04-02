@@ -71,7 +71,7 @@ namespace webApiProject.Controllers
             return Ok(colisList);
         }
         // GET: api/Colis/total
-        [HttpGet("Nombre Totale des colis")]
+        [HttpGet("Nombre_Totale_des_colis")]
         public async Task<ActionResult<int>> GetnumberTotalColis()
         {
             try
@@ -85,7 +85,7 @@ namespace webApiProject.Controllers
             }
         }
 
-        [HttpGet("nombre-total-colis-utilisateur-connecte")]
+        [HttpGet("nombre_total_colis_utilisateur_connecte")]
         [Authorize(Roles = "Fournisseur")]// Assurez-vous que l'utilisateur est authentifié
         public async Task<ActionResult<int>> GetNombreTotalColisUtilisateurConnecte()
         {
@@ -104,7 +104,7 @@ namespace webApiProject.Controllers
             }
         }
 
-        [HttpGet("nombre-total-colis/{utilisateurId}")]
+        [HttpGet("nombre_total_colis/{utilisateurId}")]
         [Authorize(Roles = "Admin")] // Assurez-vous que seuls les utilisateurs autorisés peuvent accéder à cette méthode
         public async Task<ActionResult<int>> GetNombreTotalColisParUtilisateur(string utilisateurId)
         {
@@ -122,7 +122,7 @@ namespace webApiProject.Controllers
 
 
         // GET: api/Colis/total-echange
-        [HttpGet("total colis en echange")]
+        [HttpGet("total_colis_en_echange")]
         public async Task<ActionResult<int>> GetTotalColisEchange()
         {
             try
@@ -136,7 +136,7 @@ namespace webApiProject.Controllers
             }
         }
 
-        [HttpGet("total-colis-echange-utilisateur-connecte")]
+        [HttpGet("total_colis_echange_utilisateur_connecte")]
         [Authorize(Roles = "Fournisseur")]// Assurez-vous que l'utilisateur est authentifié
         public async Task<ActionResult<int>> GetTotalColisEchangeUtilisateurConnecte()
         {
@@ -155,7 +155,7 @@ namespace webApiProject.Controllers
             }
         }
 
-        [HttpGet("total-colis-echange/{utilisateurId}")]
+        [HttpGet("total_colis_echange/{utilisateurId}")]
         [Authorize(Roles = "Admin")] // Assurez-vous que seuls les utilisateurs autorisés peuvent accéder à cette méthode
         public async Task<ActionResult<int>> GetTotalColisEchangeParUtilisateur(string utilisateurId)
         {
@@ -172,7 +172,7 @@ namespace webApiProject.Controllers
         }
 
         // GET: api/Colis/colis-echange
-        [HttpGet("liste-colis-echange")]
+        [HttpGet("liste_colis_echange")]
         public async Task<ActionResult<IEnumerable<Colis>>> GetColisEchange()
         {
             try
@@ -194,7 +194,7 @@ namespace webApiProject.Controllers
             }
         }
         // GET: api/Colis/total-livres/{annee}/{mois}
-        [HttpGet("total-livres/{annee}/{mois}")]
+        [HttpGet("total_livres/{annee}/{mois}")]
         public async Task<ActionResult<int>> GetTotalColisLivres(int annee, int mois)
         {
             try
@@ -221,7 +221,7 @@ namespace webApiProject.Controllers
             }
         }
         // GET: api/Colis/livres
-        [HttpGet("Get Total Colis Livres")]
+        [HttpGet("Get_Total_Colis_Livres")]
         public async Task<ActionResult<int>> GetTotalColisLivres()
         {
             try
@@ -235,7 +235,7 @@ namespace webApiProject.Controllers
             }
         }
         // GET: api/Colis/en-cours-de-traitement
-        [HttpGet("totale colis en-cours-de-traitement")]
+        [HttpGet("totale_colis_en_cours_de_traitement")]
         public async Task<ActionResult<int>> GetTotalColisEnCoursDeTraitement()
         {
             try
@@ -249,7 +249,7 @@ namespace webApiProject.Controllers
             }
         }
 
-        [HttpGet("total-colis-en-cours-de-traitement-for-fournissuer concted")]
+        [HttpGet("totalColisEnCoursDeTraitementFournissuerConcte")]
         [Authorize(Roles = "Fournisseur")]
         public async Task<ActionResult<int>> GetTotalColisEnCoursDeTraitementforFournissuerconcted()
         {
@@ -268,7 +268,7 @@ namespace webApiProject.Controllers
             }
         }
 
-        [HttpGet("total-colis-en-cours-de-traitement/{fournisseurId}")]
+        [HttpGet("total_colis_en_cours_de_traitement/{fournisseurId}")]
         [Authorize(Roles = "Admin")] // Assurez-vous que seuls les utilisateurs autorisés peuvent accéder à cette méthode
         public async Task<ActionResult<int>> GetTotalColisEnCoursDeTraitementByFournisseur(string fournisseurId)
         {
@@ -286,7 +286,7 @@ namespace webApiProject.Controllers
 
 
         // GET: api/Colis/annules
-        [HttpGet("Get Total Colis Annules")]
+        [HttpGet("Get_Total_Colis_Annules")]
         public async Task<ActionResult<int>> GetTotalColisAnnules()
         {
             try
@@ -299,7 +299,7 @@ namespace webApiProject.Controllers
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
         }
-        [HttpGet("Get Total Colis Annules Fournisseur Conncted")]
+        [HttpGet("Get_total_Colis_Annules_Fournisseur_Conncted")]
         [Authorize(Roles = "Fournisseur")]
         public async Task<ActionResult<int>> GetTotalColisAnnulesFournisseur()
         {
@@ -479,7 +479,7 @@ namespace webApiProject.Controllers
 
 
 
-        [HttpPost("ajouter-colis-liste")]
+        [HttpPost("ajouter_colis_liste")]
         [Authorize(Roles = "Fournisseur")]
         public async Task<IActionResult> AjouterColisliste([FromBody] Colis[] colis)
         {
@@ -544,7 +544,7 @@ namespace webApiProject.Controllers
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
         }
-        [HttpGet("total-colis-livres-montant for fournisseur concté")]
+        [HttpGet("total_colis_livres_montant_for_fournisseur_concté")]
         [Authorize(Roles = "Fournisseur")]
        
         public async Task<IActionResult> GetTotalColisLivresMontant()
@@ -584,7 +584,7 @@ namespace webApiProject.Controllers
         }
 
 
-        [HttpGet("le total des colis livrés pour tous les utilisateurs")]
+        [HttpGet("le_total_des_colis_livrés_AllUsers")]
         public async Task<IActionResult> GetTotalColisLivresMontantallUSERS()
         {
             try
@@ -620,7 +620,7 @@ namespace webApiProject.Controllers
 
 
 
-        [HttpGet("total des colis livrés pour un fournisseur spécifique /{fournisseurId}")]
+        [HttpGet("total_des_colis_livrés/{fournisseurId}")]
         public async Task<IActionResult> GetTotalColisLivresMontantByFournisseur(string fournisseurId)
         {
             try
@@ -655,7 +655,7 @@ namespace webApiProject.Controllers
         }
 
 
-        [HttpGet("total-colis-livres-montant-this-month for Fournisseur Conncted")]
+        [HttpGet("total_colis_livres_montant_this_month_for_Fournisseur_Conncted")]
         [Authorize(Roles = "Fournisseur")]
 
         public async Task<IActionResult> GetTotalColisLivresMontantThisMonth()
@@ -819,7 +819,25 @@ namespace webApiProject.Controllers
             return _context.Colis.Any(e => e.Id == id);
         }
 
+        [HttpGet("nombre_colis_livres_Fournisseur_connecte")]
+        [Authorize(Roles = "Fournisseur")] // Assurez-vous que l'utilisateur est authentifié
+        public async Task<ActionResult<int>> GetNombreColisLivresUtilisateurConnecte()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var utilisateurId = await GetUserIdFromTokenAsync();
 
+                // Compter le nombre de colis livrés pour l'utilisateur spécifié
+                int totalColisLivres = await _context.Colis.CountAsync(c => c.ApplicationUserId == utilisateurId && c.StatutLivraison == "Livré");
+
+                return Ok(totalColisLivres);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
         [HttpGet("paginated")]
         public async Task<ActionResult<PagedResult<Colis>>> GetColisPaginated(int pageNumber = 1, int pageSize = 10)
         {

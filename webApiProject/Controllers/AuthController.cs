@@ -115,7 +115,7 @@ namespace webApiProject.Controllers
 
         [HttpGet("unverifiedSuppliers")]
         [Authorize(Roles = "Admin")]
-        [Authorize(Roles = "Assistante")]
+      
         public async Task<IActionResult> GetUnverifiedSuppliers()
         {
             try
@@ -156,7 +156,10 @@ namespace webApiProject.Controllers
                 // Générer le token JWT
                 var tokenString = GenerateJWTToken(user);
 
-                // Retourner le corps de l'utilisateur avec le token
+                // Récupérer les rôles de l'utilisateur
+                var roles = await _userManager.GetRolesAsync(user);
+
+                // Retourner le corps de l'utilisateur avec le token et le rôle
                 return Ok(new
                 {
                     user = new
@@ -167,7 +170,8 @@ namespace webApiProject.Controllers
                         user.FirstName,
                         user.LastName,
                         user.PhoneNumber,
-                        user.IsVerified
+                        user.IsVerified,
+                        Roles = roles // Ajouter les rôles ici
                     },
                     token = tokenString
                 });
@@ -175,6 +179,7 @@ namespace webApiProject.Controllers
 
             return Unauthorized("Nom d'utilisateur ou mot de passe incorrect.");
         }
+
 
 
         private async Task<string> GenerateJWTToken(ApplicationUser user)
@@ -247,7 +252,7 @@ namespace webApiProject.Controllers
 
         [HttpGet("allFournisseur")]
         [Authorize(Roles = "Admin")]
-        [Authorize(Roles = "Assistante")]
+       
         public async Task<IActionResult> GetAllUsersByRole()
         {
             // Récupérer tous les utilisateurs ayant le rôle "Fournisseur"

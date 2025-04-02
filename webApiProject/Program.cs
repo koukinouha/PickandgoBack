@@ -5,20 +5,10 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using webApiProject;
-using System.Globalization;
-using System.Threading;
 using webApiProject.Repository;
 using webApiProject.EmailConfiguration;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Supprimer la configuration de la culture si elle n'est pas nécessaire
-// Si vous avez besoin de la culture, assurez-vous que votre environnement la supporte
-/*
-var cultureInfo = new CultureInfo("en-US");
-Thread.CurrentThread.CurrentCulture = cultureInfo;
-Thread.CurrentThread.CurrentUICulture = cultureInfo;
-*/
 
 // Ajouter les services au conteneur.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -90,14 +80,24 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("ClientOnly", policy => policy.RequireRole("Fournisseur"));
 });
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-// Dans Program.cs ou Startup.cs
 builder.Services.AddScoped<AuthRepository>();
-// Dans Program.cs ou Startup.cs
 builder.Services.AddScoped<IEmailService, EmailService>(); // Remplacez EmailService par votre implémentation
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", builder =>
+    {
+        builder.WithOrigins("http://localhost:4200", "http://localhost:5183")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // Autoriser les informations d'identification
+    });
+});
 
 var app = builder.Build();
+
 // Créer les rôles s'ils n'existent pas
 using (var scope = app.Services.CreateScope())
 {
@@ -112,6 +112,7 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
+
 // Configurer le pipeline de requêtes HTTP.
 if (app.Environment.IsDevelopment())
 {
@@ -120,8 +121,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
+
 app.UseAuthentication(); // Assurez-vous d'utiliser l'authentification avant l'autorisation
-app.UseAuthorization();
+app.UseAuthorization(); // Doit être entre UseRouting et MapControllers
+
+app.UseCors("AllowSpecificOrigin");
 
 app.MapControllers();
 

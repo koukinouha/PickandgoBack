@@ -69,7 +69,7 @@ namespace webApiProject.Controllers
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
         }
-       /** [HttpGet("GetFactureForUser/{userId}")]
+        [HttpGet("GetFactureForUser/{userId}")]
         [Authorize(Roles = "Fournisseur, Admin")]
         public async Task<ActionResult<Facture>> GetFactureForUser(string userId)
         {
@@ -99,7 +99,7 @@ namespace webApiProject.Controllers
                     NomDestinataire = "", // Ne pas afficher
                     TelephoneDestinataire = "", // Ne pas afficher
                     AdresseDestinataire = "", // Ne pas afficher
-                    CodeTVA = "123",
+                    CodeTVA = "%",
                     NombreColis = totalColis,
                     MontantTotal = montantTotal,
                     CodeGouvernorat = "", // Ne pas afficher
@@ -116,7 +116,7 @@ namespace webApiProject.Controllers
             {
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
-        }**/
+        }
 
 
         [HttpPut("update/{colisId}")]
