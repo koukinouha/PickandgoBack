@@ -86,36 +86,47 @@ namespace webApiProject.Controllers
         }
 
         [HttpPost("validateSupplier/{userId}")]
-        [Authorize(Roles = "Admin")]
-        [Authorize(Roles = "Assistante")]
+        [Authorize(Roles = "Admin , Assistante")]
+
+        
         public async Task<IActionResult> ValidateSupplier(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
+            try
             {
-                return NotFound("Utilisateur non trouvé.");
-            }
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return Ok(new { code = -1, message = "Utilisateur non trouvé." });
+                }
 
-            // Vérifier si l'utilisateur est un fournisseur
-            if (!await _userManager.IsInRoleAsync(user, role.Fournisseur.ToString()))
+                // Vérifier si l'utilisateur est un fournisseur
+                if (!await _userManager.IsInRoleAsync(user, role.Fournisseur.ToString()))
+                {
+                    return Ok(new { code = -1, message = "Cet utilisateur n'est pas un fournisseur." });
+                }
+
+                // Activer le compte du fournisseur
+                user.IsVerified = true;
+                await _userManager.UpdateAsync(user);
+
+                // Générer un token de réinitialisation pour lui envoyer par mail
+                var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                // Envoyer l'e-mail
+                await SendSupplierConfirmationEmail(user.Email, user.UserName, passwordResetToken);
+
+                return Ok(new { code = 1, message = "Le compte du fournisseur a été validé avec succès." });
+            }
+            catch (Exception ex)
             {
-                return BadRequest("Cet utilisateur n'est pas un fournisseur.");
+                return Ok(new { code = -1, message = $"Une erreur est survenue : {ex.Message}" });
             }
-
-            // Activer le compte du fournisseur
-            user.IsVerified = true;
-            await _userManager.UpdateAsync(user);
-
-            // Envoyer un e-mail au fournisseur avec ses informations de connexion
-            var password = await _userManager.GeneratePasswordResetTokenAsync(user);
-            await SendSupplierConfirmationEmail(user.Email, user.UserName, password);
-
-            return Ok("Le compte du fournisseur a été validé avec succès.");
         }
 
+
         [HttpGet("unverifiedSuppliers")]
-        [Authorize(Roles = "Admin")]
-      
+        [Authorize(Roles = "Admin,Assistante")]
+
         public async Task<IActionResult> GetUnverifiedSuppliers()
         {
             try
@@ -138,49 +149,56 @@ namespace webApiProject.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.Username);
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+            try
             {
-                // Vérifier si l'utilisateur est un fournisseur non vérifié
-                if (await _userManager.IsInRoleAsync(user, role.Fournisseur.ToString()) && !user.IsVerified)
+                var user = await _userManager.FindByNameAsync(model.Username);
+                if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
                 {
-                    return BadRequest("Votre compte doit être validé par un administrateur avant de pouvoir vous connecter.");
-                }
-
-                // Vérifier si l'utilisateur est un fournisseur validé
-                if (await _userManager.IsInRoleAsync(user, role.Fournisseur.ToString()) && user.IsVerified)
-                {
-                    // Ici, vous pouvez ajouter des logiques spécifiques pour les fournisseurs
-                }
-
-                // Générer le token JWT
-                var tokenString = GenerateJWTToken(user);
-
-                // Récupérer les rôles de l'utilisateur
-                var roles = await _userManager.GetRolesAsync(user);
-
-                // Retourner le corps de l'utilisateur avec le token et le rôle
-                return Ok(new
-                {
-                    user = new
+                    // Vérifier si l'utilisateur est un fournisseur non vérifié
+                    if (await _userManager.IsInRoleAsync(user, role.Fournisseur.ToString()) && !user.IsVerified)
                     {
-                        user.Id,
-                        user.UserName,
-                        user.Email,
-                        user.FirstName,
-                        user.LastName,
-                        user.PhoneNumber,
-                        user.IsVerified,
-                        Roles = roles // Ajouter les rôles ici
-                    },
-                    token = tokenString
-                });
+                        return BadRequest(new { status = -1, message = "Votre compte doit être validé par un administrateur avant de pouvoir vous connecter." });
+                    }
+
+                    // Vérifier si l'utilisateur est un fournisseur validé
+                    if (await _userManager.IsInRoleAsync(user, role.Fournisseur.ToString()) && user.IsVerified)
+                    {
+                        // Ici, vous pouvez ajouter des logiques spécifiques pour les fournisseurs
+                    }
+
+                    // Générer le token JWT
+                    var tokenString = await GenerateJWTToken(user);
+
+                    // Récupérer le rôle de l'utilisateur
+                    var userRole = await GetUserRoleAsync(user);
+
+                    // Retourner le corps de l'utilisateur avec le token et le rôle
+                    return Ok(new
+                    {
+                        status = 5,
+                        user = new
+                        {
+                            user.Id,
+                            user.UserName,
+                            user.Email,
+                            user.FirstName,
+                            user.LastName,
+                            user.PhoneNumber,
+                            user.IsVerified,
+                            Role = userRole // Retourner le rôle en tant que chaîne de caractères
+                        },
+                        token = tokenString
+                    });
+                }
+
+                return BadRequest(new { status = -1, message = "Nom d'utilisateur ou mot de passe incorrect." });
             }
-
-            return Unauthorized("Nom d'utilisateur ou mot de passe incorrect.");
+            catch (Exception ex)
+            {
+                // Gérer les erreurs
+                return StatusCode(500, new { status = -1, message = $"Une erreur s'est produite lors de la connexion : {ex.Message}" });
+            }
         }
-
-
 
         private async Task<string> GenerateJWTToken(ApplicationUser user)
         {
@@ -200,12 +218,9 @@ namespace webApiProject.Controllers
         new Claim(ClaimTypes.Surname, user.LastName)
     };
 
-            // Ajouter les rôles de l'utilisateur
-            var roles = await _userManager.GetRolesAsync(user);
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
+            // Ajouter le rôle de l'utilisateur
+            var role = await GetUserRoleAsync(user);
+            claims.Add(new Claim(ClaimTypes.Role, role));
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
@@ -217,6 +232,32 @@ namespace webApiProject.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        private async Task<string> GetUserRoleAsync(ApplicationUser user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Contains(role.Fournisseur.ToString()))
+            {
+                return role.Fournisseur.ToString();
+            }
+            else if (roles.Contains(role.Admin.ToString()))
+            {
+                return role.Admin.ToString();
+            }
+            else if (roles.Contains(role.Assistante.ToString()))
+            {
+                return role.Assistante.ToString();
+            }
+            else
+            {
+                // Si aucun rôle n'est trouvé, retourner une chaîne vide
+                return "";
+            }
+        }
+
+
+
+
 
         private async Task SendAdminConfirmationEmail(string email, string username, string password)
         {
@@ -313,6 +354,91 @@ namespace webApiProject.Controllers
 
             return Ok("Si l'adresse e-mail existe, un code de réinitialisation a été envoyé.");
         }
+
+
+
+        [HttpGet("logout")]
+        public IActionResult Logout()
+        {
+            try
+            {
+                // Récupérer le token JWT depuis les en-têtes de la requête
+                var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+                if (string.IsNullOrEmpty(token))
+                {
+                    // Pas de token fourni, retourner un code d'échec
+                    return Ok(new { Status = -1, Message = "Aucun token JWT n'a été fourni." });
+                }
+
+                // Désactiver le token JWT
+                var jwtHandler = new JwtSecurityTokenHandler();
+                var jwtToken = jwtHandler.ReadJwtToken(token);
+
+                // Créer un nouveau jeton avec une date d'expiration passée
+                var newToken = new JwtSecurityToken(
+                    jwtToken.Issuer,
+                    jwtToken.Audiences.FirstOrDefault(),
+                    jwtToken.Claims,
+                    DateTime.UtcNow.AddMinutes(-1),
+                    jwtToken.ValidTo,
+                    jwtToken.SigningCredentials
+                );
+
+                // Générer le nouveau token expiré
+                var expiredToken = jwtHandler.WriteToken(newToken);
+
+                // Retourner un code de succès
+                return Ok(new { Status = 1, Message = "Déconnexion réussie.", ExpiredToken = expiredToken });
+            }
+            catch (Exception ex)
+            {
+                // Gérer les erreurs, retourner un code d'échec
+                return Ok(new { Status = -1, Message = $"Une erreur s'est produite lors de la déconnexion : {ex.Message}" });
+            }
+        }
+        [HttpGet("currentUser")]
+        [Authorize] // Nécessite que l'utilisateur soit authentifié
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir des claims (ici UserId)
+                var userId = User.FindFirstValue("UserId");
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return BadRequest("Identifiant utilisateur introuvable dans les claims.");
+                }
+
+                // Récupérer l'utilisateur à partir de l'ID
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    return NotFound("Utilisateur non trouvé.");
+                }
+
+                // Récupérer le rôle de l'utilisateur
+                var role = await GetUserRoleAsync(user);
+
+                // Retourner les informations de l'utilisateur
+                return Ok(new
+                {
+                    user.Id,
+                    user.UserName,
+                    user.Email,
+                    user.FirstName,
+                    user.LastName,
+                    user.PhoneNumber,
+                    user.IsVerified,
+                    Role = role
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Une erreur s'est produite lors de la récupération de l'utilisateur : {ex.Message}");
+            }
+        }
+
 
         [HttpPost("resetPassword")]
         public async Task<IActionResult> ResetPassword(ResetPasswordModel model)

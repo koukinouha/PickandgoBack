@@ -7,7 +7,9 @@ public class Colis
 {
     [Key]
     public int Id { get; set; } // Identifiant unique du colis
-
+   // public int Cin { get; set; }
+    public int fraisLivraison { get; set; }
+   // public string matricule { get; set; }
     public string NomComplet { get; set; } = string.Empty; // Nom complet du destinataire
     public string CodeGouvernorat { get; set; } = string.Empty; // Code du gouvernorat
     public string Delegation { get; set; } = string.Empty; // Délégation

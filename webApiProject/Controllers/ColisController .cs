@@ -71,267 +71,8 @@ namespace webApiProject.Controllers
             return Ok(colisList);
         }
         // GET: api/Colis/total
-        [HttpGet("Nombre_Totale_des_colis")]
-        public async Task<ActionResult<int>> GetnumberTotalColis()
-        {
-            try
-            {
-                int totalColis = await _context.Colis.CountAsync();
-                return Ok(totalColis);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
+     
 
-        [HttpGet("nombre_total_colis_utilisateur_connecte")]
-        [Authorize(Roles = "Fournisseur")]// Assurez-vous que l'utilisateur est authentifié
-        public async Task<ActionResult<int>> GetNombreTotalColisUtilisateurConnecte()
-        {
-            try
-            {
-                // Récupérer l'ID de l'utilisateur à partir du token
-                var utilisateurId = await GetUserIdFromTokenAsync();
-
-                // Compter le nombre de colis pour l'utilisateur spécifié
-                int totalColis = await _context.Colis.CountAsync(c => c.ApplicationUserId == utilisateurId);
-                return Ok(totalColis);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-
-        [HttpGet("nombre_total_colis/{utilisateurId}")]
-        [Authorize(Roles = "Admin")] // Assurez-vous que seuls les utilisateurs autorisés peuvent accéder à cette méthode
-        public async Task<ActionResult<int>> GetNombreTotalColisParUtilisateur(string utilisateurId)
-        {
-            try
-            {
-                // Compter le nombre de colis pour l'utilisateur spécifié
-                int totalColis = await _context.Colis.CountAsync(c => c.ApplicationUserId == utilisateurId);
-                return Ok(totalColis);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-
-
-        // GET: api/Colis/total-echange
-        [HttpGet("total_colis_en_echange")]
-        public async Task<ActionResult<int>> GetTotalColisEchange()
-        {
-            try
-            {
-                int totalColisEchange = await _context.Colis.CountAsync(c => c.Echange);
-                return Ok(totalColisEchange);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-
-        [HttpGet("total_colis_echange_utilisateur_connecte")]
-        [Authorize(Roles = "Fournisseur")]// Assurez-vous que l'utilisateur est authentifié
-        public async Task<ActionResult<int>> GetTotalColisEchangeUtilisateurConnecte()
-        {
-            try
-            {
-                // Récupérer l'ID de l'utilisateur à partir du token
-                var utilisateurId = await GetUserIdFromTokenAsync();
-
-                // Compter le nombre de colis en échange pour l'utilisateur spécifié
-                int totalColisEchange = await _context.Colis.CountAsync(c => c.ApplicationUserId == utilisateurId && c.Echange);
-                return Ok(totalColisEchange);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-
-        [HttpGet("total_colis_echange/{utilisateurId}")]
-        [Authorize(Roles = "Admin")] // Assurez-vous que seuls les utilisateurs autorisés peuvent accéder à cette méthode
-        public async Task<ActionResult<int>> GetTotalColisEchangeParUtilisateur(string utilisateurId)
-        {
-            try
-            {
-                // Compter le nombre de colis en échange pour l'utilisateur spécifié
-                int totalColisEchange = await _context.Colis.CountAsync(c => c.ApplicationUserId == utilisateurId && c.Echange);
-                return Ok(totalColisEchange);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-
-        // GET: api/Colis/colis-echange
-        [HttpGet("liste_colis_echange")]
-        public async Task<ActionResult<IEnumerable<Colis>>> GetColisEchange()
-        {
-            try
-            {
-                var colisEchangeList = await _context.Colis
-                    .Where(c => c.Echange)
-                    .ToListAsync();
-
-                if (colisEchangeList == null || !colisEchangeList.Any())
-                {
-                    return NotFound("Aucun colis trouvé avec l'échange activé.");
-                }
-
-                return Ok(colisEchangeList);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-        // GET: api/Colis/total-livres/{annee}/{mois}
-        [HttpGet("total_livres/{annee}/{mois}")]
-        public async Task<ActionResult<int>> GetTotalColisLivres(int annee, int mois)
-        {
-            try
-            {
-                // Vérification de la validité du mois
-                if (mois < 1 || mois > 12)
-                {
-                    return BadRequest("Le mois doit être compris entre 1 et 12.");
-                }
-
-                // Calcul des dates de début et de fin pour le mois donné
-                var dateDebut = new DateTime(annee, mois, 1);
-                var dateFin = dateDebut.AddMonths(1).AddDays(-1); // Dernier jour du mois
-
-                // Comptage des colis livrés dans le mois spécifié
-                int totalColisLivres = await _context.Colis
-                    .CountAsync(c => c.StatutLivraison == "Livré" && c.DateAjoutColis >= dateDebut && c.DateAjoutColis <= dateFin);
-
-                return Ok(totalColisLivres);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-        // GET: api/Colis/livres
-        [HttpGet("Get_Total_Colis_Livres")]
-        public async Task<ActionResult<int>> GetTotalColisLivres()
-        {
-            try
-            {
-                int totalLivres = await _context.Colis.CountAsync(c => c.StatutLivraison == "Livré");
-                return Ok(totalLivres);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-        // GET: api/Colis/en-cours-de-traitement
-        [HttpGet("totale_colis_en_cours_de_traitement")]
-        public async Task<ActionResult<int>> GetTotalColisEnCoursDeTraitement()
-        {
-            try
-            {
-                int totalEnCoursDeTraitement = await _context.Colis.CountAsync(c => c.StatutLivraison == "EnCoursDeTraitement");
-                return Ok(totalEnCoursDeTraitement);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-
-        [HttpGet("totalColisEnCoursDeTraitementFournissuerConcte")]
-        [Authorize(Roles = "Fournisseur")]
-        public async Task<ActionResult<int>> GetTotalColisEnCoursDeTraitementforFournissuerconcted()
-        {
-            try
-            {
-                // Récupérer l'ID de l'utilisateur à partir du token
-                var fournisseurId = await GetUserIdFromTokenAsync();
-
-                // Compter le nombre de colis en cours de traitement pour le fournisseur spécifié
-                int totalEnCoursDeTraitement = await _context.Colis.CountAsync(c => c.ApplicationUserId == fournisseurId && c.StatutLivraison == "EnCoursDeTraitement");
-                return Ok(totalEnCoursDeTraitement);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-
-        [HttpGet("total_colis_en_cours_de_traitement/{fournisseurId}")]
-        [Authorize(Roles = "Admin")] // Assurez-vous que seuls les utilisateurs autorisés peuvent accéder à cette méthode
-        public async Task<ActionResult<int>> GetTotalColisEnCoursDeTraitementByFournisseur(string fournisseurId)
-        {
-            try
-            {
-                // Compter le nombre de colis en cours de traitement pour le fournisseur spécifié
-                int totalEnCoursDeTraitement = await _context.Colis.CountAsync(c => c.ApplicationUserId == fournisseurId && c.StatutLivraison == "EnCoursDeTraitement");
-                return Ok(totalEnCoursDeTraitement);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-
-
-        // GET: api/Colis/annules
-        [HttpGet("Get_Total_Colis_Annules")]
-        public async Task<ActionResult<int>> GetTotalColisAnnules()
-        {
-            try
-            {
-                int totalAnnules = await _context.Colis.CountAsync(c => c.StatutLivraison == "Annulé");
-                return Ok(totalAnnules);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-        [HttpGet("Get_total_Colis_Annules_Fournisseur_Conncted")]
-        [Authorize(Roles = "Fournisseur")]
-        public async Task<ActionResult<int>> GetTotalColisAnnulesFournisseur()
-        {
-            try
-            {
-                // Récupérer l'ID de l'utilisateur à partir du token
-                var fournisseurId = await GetUserIdFromTokenAsync();
-
-                // Compter le nombre de colis annulés pour le fournisseur spécifié
-                int totalAnnules = await _context.Colis.CountAsync(c => c.ApplicationUserId == fournisseurId && c.StatutLivraison == "Annulé");
-                return Ok(totalAnnules);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-
-        [HttpGet("GetTotalColisAnnulesByFournisseur/{fournisseurId}")]
-        public async Task<ActionResult<int>> GetTotalColisAnnulesByFournisseur(string fournisseurId)
-        {
-            try
-            {
-                // Compter le nombre de colis annulés pour le fournisseur spécifié
-                int totalAnnules = await _context.Colis.CountAsync(c => c.ApplicationUserId == fournisseurId && c.StatutLivraison == "Annulé");
-                return Ok(totalAnnules);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
 
         // GET: api/Colis
         [HttpGet]
@@ -360,6 +101,12 @@ namespace webApiProject.Controllers
                 return BadRequest("Le colis ne peut pas être nul.");
             }
 
+            // Vérifier que le nombre d'articles est au moins 1
+            if (colis.NombreArticles < 1)
+            {
+                return BadRequest("Le nombre d'articles doit être au moins 1.");
+            }
+
             try
             {
                 // Récupérer l'ID de l'utilisateur à partir du token
@@ -385,9 +132,116 @@ namespace webApiProject.Controllers
         }
 
 
+        [HttpGet("Get_Total_Colis_Retour_Nombre")]
+        [Authorize] // Autoriser tous les utilisateurs authentifiés
+        public async Task<ActionResult<int>> GetTotalColisRetourNombre()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var userId = await GetUserIdFromTokenAsync();
+
+                // Vérifier le rôle de l'utilisateur
+                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(userId));
+
+                if (roles.Contains("Admin") || roles.Contains("Assistante"))
+                {
+                    // Si l'utilisateur est Admin ou Assistante, calculer le nombre total de tous les colis avec le statut "Retour à l'expéditeur"
+                    var totalNombre = await _context.Colis
+                        .Where(c => c.StatutLivraison == "RetourÀLExpéditeur")
+                        .CountAsync();
+                    return Ok(totalNombre);
+                }
+                else if (roles.Contains("Fournisseur"))
+                {
+                    // Si l'utilisateur est Fournisseur, calculer le nombre total des colis avec le statut "Retour à l'expéditeur" pour ce fournisseur
+                    var totalNombreFournisseur = await _context.Colis
+                        .Where(c => c.ApplicationUserId == userId && c.StatutLivraison == "RetourÀLExpéditeur")
+                        .CountAsync();
+                    return Ok(totalNombreFournisseur);
+                }
+
+                return Forbid("Accès interdit : rôle non autorisé.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+        [HttpPut("ModifierStatutLivraison/{colisId}")]
+        [Authorize(Roles = "Admin,Assistante")]
+        public async Task<IActionResult> ModifierStatutLivraison(int colisId, [FromBody] string nouveauStatut)
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var userId = await GetUserIdFromTokenAsync();
+
+                // Vérifier si l'utilisateur a le rôle "Admin" ou "Assistante"
+                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(userId));
+                if (!roles.Contains("Admin") && !roles.Contains("Assistante"))
+                {
+                    return Forbid("Accès interdit : seuls les administrateurs et les assistantes peuvent modifier le statut de livraison.");
+                }
+
+                // Récupérer le colis à modifier
+                var colis = await _context.Colis.FindAsync(colisId);
+                if (colis == null)
+                {
+                    return NotFound($"Le colis avec l'ID {colisId} n'a pas été trouvé.");
+                }
+
+                // Mettre à jour le statut de livraison
+                colis.StatutLivraison = nouveauStatut;
+                _context.Colis.Update(colis);
+                await _context.SaveChangesAsync();
+
+                return Ok($"Le statut de livraison du colis {colisId} a été mis à jour avec le nouveau statut : {nouveauStatut}.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
 
 
+        [HttpGet("Get_Total_Colis_Annule_Nombre")]
+        [Authorize] // Autoriser tous les utilisateurs authentifiés
+        public async Task<ActionResult<int>> GetTotalColisAnnuleNombre()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var userId = await GetUserIdFromTokenAsync();
 
+                // Vérifier le rôle de l'utilisateur
+                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(userId));
+
+                if (roles.Contains("Admin") || roles.Contains("Assistante"))
+                {
+                    // Si l'utilisateur est Admin ou Assistante, calculer le nombre total de tous les colis avec le statut "Annulé"
+                    var totalNombre = await _context.Colis
+                        .Where(c => c.StatutLivraison == "Annulé")
+                        .CountAsync();
+                    return Ok(totalNombre);
+                }
+                else if (roles.Contains("Fournisseur"))
+                {
+                    // Si l'utilisateur est Fournisseur, calculer le nombre total des colis avec le statut "Annulé" pour ce fournisseur
+                    var totalNombreFournisseur = await _context.Colis
+                        .Where(c => c.ApplicationUserId == userId && c.StatutLivraison == "Annulé")
+                        .CountAsync();
+                    return Ok(totalNombreFournisseur);
+                }
+
+                return Forbid("Accès interdit : rôle non autorisé.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
 
 
 
@@ -418,64 +272,32 @@ namespace webApiProject.Controllers
             return NoContent();
         }
         // GET: api/Colis/mes-colis
-        [HttpGet("mes-colis")]
-        [Authorize(Roles = "Fournisseur")]
-        public async Task<ActionResult<IEnumerable<Colis>>> GetColisByFournisseur()
-        {
-            try
-            {
-                // Récupérer l'ID de l'utilisateur à partir du token
-                var userId = await GetUserIdFromTokenAsync();
 
-                // Récupérer les colis associés à cet ID utilisateur
-                var colisList = await _context.Colis
-                    .Where(c => c.ApplicationUserId == userId)
-                    .ToListAsync();
-
-                if (colisList == null || !colisList.Any())
-                {
-                    return NotFound("Aucun colis trouvé pour ce fournisseur.");
-                }
-
-                return Ok(colisList);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
 
         // DELETE: api/Colis/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteColis(int id)
         {
-            var colis = await _context.Colis.FindAsync(id);
-            if (colis == null)
+            try
             {
-                return NotFound();
+                var colis = await _context.Colis.FindAsync(id);
+                if (colis == null)
+                {
+                    return Ok(new { code = -1, message = "Colis introuvable." });
+                }
+
+                _context.Colis.Remove(colis);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { code = 1, message = "Colis supprimé avec succès." });
             }
-
-            _context.Colis.Remove(colis);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return Ok(new { code = -1, message = $"Erreur lors de la suppression du colis : {ex.Message}" });
+            }
         }
 
-        // PUT: api/Colis/{id}/UpdateStatus
-        [HttpPut("{id}/UpdateStatus")]
-        public async Task<IActionResult> UpdateColisStatus(int id, [FromBody] string newStatus)
-        {
-            var colis = await _context.Colis.FindAsync(id);
-            if (colis == null)
-            {
-                return NotFound();
-            }
 
-            colis.StatutLivraison = newStatus;
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
 
 
 
@@ -544,73 +366,44 @@ namespace webApiProject.Controllers
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
         }
-        [HttpGet("total_colis_livres_montant_for_fournisseur_concté")]
-        [Authorize(Roles = "Fournisseur")]
-       
-        public async Task<IActionResult> GetTotalColisLivresMontant()
+
+
+
+
+
+
+
+
+        [HttpGet("Get_Total_Colis_Livres_Montant")]
+        [Authorize] // Autoriser tous les utilisateurs authentifiés
+        public async Task<ActionResult<decimal>> GetTotalColisLivresMontant()
         {
             try
             {
                 // Récupérer l'ID de l'utilisateur à partir du token
                 var userId = await GetUserIdFromTokenAsync();
 
-                // Récupérer les colis livrés pour cet utilisateur
-                var colisLivres = await _context.Colis
-                    .Where(c => c.ApplicationUserId == userId && c.StatutLivraison == "Livré")
-                    .ToListAsync();
+                // Vérifier le rôle de l'utilisateur
+                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(userId));
 
-                if (colisLivres == null || !colisLivres.Any())
+                if (roles.Contains("Admin") || roles.Contains("Assistante"))
                 {
-                    return NotFound($"Aucun colis livré trouvé pour l'utilisateur {userId}.");
+                    // Si l'utilisateur est Admin ou Assistante, calculer le montant total de tous les colis livrés
+                    var totalMontant = await _context.Colis
+                        .Where(c => c.StatutLivraison == "Livré")
+                        .SumAsync(c => c.Prix * c.NombreArticles);
+                    return Ok(totalMontant);
+                }
+                else if (roles.Contains("Fournisseur"))
+                {
+                    // Si l'utilisateur est Fournisseur, calculer le montant total des colis livrés par ce fournisseur
+                    var totalMontantFournisseur = await _context.Colis
+                        .Where(c => c.ApplicationUserId == userId && c.StatutLivraison == "Livré")
+                        .SumAsync(c => c.Prix * c.NombreArticles);
+                    return Ok(totalMontantFournisseur);
                 }
 
-                // Calculer le montant total des colis livrés
-                var montantTotal = colisLivres.Sum(c => c.Prix);
-
-                return Ok(new
-                {
-                    TotalColisLivres = colisLivres.Count,
-                    MontantTotal = montantTotal
-                });
-            }
-            catch (ApplicationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-
-
-        [HttpGet("le_total_des_colis_livrés_AllUsers")]
-        public async Task<IActionResult> GetTotalColisLivresMontantallUSERS()
-        {
-            try
-            {
-                // Récupérer tous les colis livrés
-                var colisLivres = await _context.Colis
-                    .Where(c => c.StatutLivraison == "Livré")
-                    .ToListAsync();
-
-                if (colisLivres == null || !colisLivres.Any())
-                {
-                    return NotFound("Aucun colis livré trouvé.");
-                }
-
-                // Calculer le montant total des colis livrés
-                var montantTotal = colisLivres.Sum(c => c.Prix);
-
-                return Ok(new
-                {
-                    TotalColisLivres = colisLivres.Count,
-                    MontantTotal = montantTotal
-                });
-            }
-            catch (ApplicationException ex)
-            {
-                return BadRequest(ex.Message);
+                return Forbid("Accès interdit : rôle non autorisé.");
             }
             catch (Exception ex)
             {
@@ -620,172 +413,36 @@ namespace webApiProject.Controllers
 
 
 
-        [HttpGet("total_des_colis_livrés/{fournisseurId}")]
-        public async Task<IActionResult> GetTotalColisLivresMontantByFournisseur(string fournisseurId)
-        {
-            try
-            {
-                // Récupérer les colis livrés pour le fournisseur spécifié
-                var colisLivres = await _context.Colis
-                    .Where(c => c.ApplicationUserId == fournisseurId && c.StatutLivraison == "Livré")
-                    .ToListAsync();
-
-                if (colisLivres == null || !colisLivres.Any())
-                {
-                    return NotFound($"Aucun colis livré trouvé pour le fournisseur avec l'ID {fournisseurId}.");
-                }
-
-                // Calculer le montant total des colis livrés
-                var montantTotal = colisLivres.Sum(c => c.Prix);
-
-                return Ok(new
-                {
-                    TotalColisLivres = colisLivres.Count,
-                    MontantTotal = montantTotal
-                });
-            }
-            catch (ApplicationException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
 
 
-        [HttpGet("total_colis_livres_montant_this_month_for_Fournisseur_Conncted")]
-        [Authorize(Roles = "Fournisseur")]
 
-        public async Task<IActionResult> GetTotalColisLivresMontantThisMonth()
+
+        [HttpGet("Get_TotalNumber_Colis")]
+        [Authorize] // Autoriser tous les utilisateurs authentifiés
+        public async Task<ActionResult<int>> GetTotalColis()
         {
             try
             {
                 // Récupérer l'ID de l'utilisateur à partir du token
                 var userId = await GetUserIdFromTokenAsync();
 
-                // Récupérer le mois et l'année en cours
-                var currentMonth = DateTime.UtcNow.Month;
-                var currentYear = DateTime.UtcNow.Year;
+                // Vérifier le rôle de l'utilisateur
+                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(userId));
 
-                // Récupérer les colis livrés pour cet utilisateur et le mois en cours
-                var colisLivres = await _context.Colis
-                    .Where(c => c.ApplicationUserId == userId
-                            && c.StatutLivraison == "Livré"
-                            && c.DateAjoutColis.Month == currentMonth
-                            && c.DateAjoutColis.Year == currentYear)
-                    .ToListAsync();
-
-                if (colisLivres == null || !colisLivres.Any())
+                if (roles.Contains("Admin") || roles.Contains("Assistante"))
                 {
-                    return Ok(new
-                    {
-                        TotalColisLivres = -1,
-                        MontantTotal = -1
-                    });
+                    // Si l'utilisateur est Admin ou Assistante, compter tous les colis
+                    int totalColis = await _context.Colis.CountAsync();
+                    return Ok(totalColis);
+                }
+                else if (roles.Contains("Fournisseur"))
+                {
+                    // Si l'utilisateur est Fournisseur, compter les colis ajoutés par ce fournisseur
+                    int totalColisFournisseur = await _context.Colis.CountAsync(c => c.ApplicationUserId == userId);
+                    return Ok(totalColisFournisseur);
                 }
 
-                // Calculer le montant total des colis livrés
-                var montantTotal = colisLivres.Sum(c => c.Prix);
-
-                return Ok(new
-                {
-                    TotalColisLivres = 1,
-                    MontantTotal = montantTotal
-                });
-            }
-            catch (ApplicationException ex)
-            {
-                return Ok(new
-                {
-                    TotalColisLivres = -1,
-                    MontantTotal = -1
-                });
-            }
-            catch (Exception ex)
-            {
-                return Ok(new
-                {
-                    TotalColisLivres = -1,
-                    MontantTotal = -1
-                });
-            }
-        }
-        [HttpGet("total-colis-livres-montant-all-users-this-month")]
-        public async Task<IActionResult> GetTotalColisLivresMontantAllUsersThisMonth()
-        {
-            try
-            {
-                // Récupérer le mois et l'année en cours
-                var currentMonth = DateTime.UtcNow.Month;
-                var currentYear = DateTime.UtcNow.Year;
-
-                // Récupérer tous les colis livrés pour le mois en cours
-                var colisLivres = await _context.Colis
-                    .Where(c => c.StatutLivraison == "Livré"
-                            && c.DateAjoutColis.Month == currentMonth
-                            && c.DateAjoutColis.Year == currentYear)
-                    .ToListAsync();
-
-                if (colisLivres == null || !colisLivres.Any())
-                {
-                    return Ok(new
-                    {
-                        TotalColisLivres = 0,
-                        MontantTotal = 0
-                    });
-                }
-
-                // Calculer le montant total des colis livrés
-                var montantTotal = colisLivres.Sum(c => c.Prix);
-
-                return Ok(new
-                {
-                    TotalColisLivres = colisLivres.Count,
-                    MontantTotal = montantTotal
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
-
-        [HttpGet("total-colis-livres-montant-by-fournisseur/{fournisseurId}")]
-        public async Task<IActionResult> GetTotalColisLivresMontantByFournisseurThisMonth(string fournisseurId)
-        {
-            try
-            {
-                // Récupérer le mois et l'année en cours
-                var currentMonth = DateTime.UtcNow.Month;
-                var currentYear = DateTime.UtcNow.Year;
-
-                // Récupérer les colis livrés pour le fournisseur spécifié et le mois en cours
-                var colisLivres = await _context.Colis
-                    .Where(c => c.ApplicationUserId == fournisseurId
-                            && c.StatutLivraison == "Livré"
-                            && c.DateAjoutColis.Month == currentMonth
-                            && c.DateAjoutColis.Year == currentYear)
-                    .ToListAsync();
-
-                if (colisLivres == null || !colisLivres.Any())
-                {
-                    return Ok(new
-                    {
-                        TotalColisLivres = 0,
-                        MontantTotal = 0
-                    });
-                }
-
-                // Calculer le montant total des colis livrés
-                var montantTotal = colisLivres.Sum(c => c.Prix);
-
-                return Ok(new
-                {
-                    TotalColisLivres = colisLivres.Count,
-                    MontantTotal = montantTotal
-                });
+                return Forbid("Accès interdit : rôle non autorisé.");
             }
             catch (Exception ex)
             {
@@ -819,25 +476,7 @@ namespace webApiProject.Controllers
             return _context.Colis.Any(e => e.Id == id);
         }
 
-        [HttpGet("nombre_colis_livres_Fournisseur_connecte")]
-        [Authorize(Roles = "Fournisseur")] // Assurez-vous que l'utilisateur est authentifié
-        public async Task<ActionResult<int>> GetNombreColisLivresUtilisateurConnecte()
-        {
-            try
-            {
-                // Récupérer l'ID de l'utilisateur à partir du token
-                var utilisateurId = await GetUserIdFromTokenAsync();
-
-                // Compter le nombre de colis livrés pour l'utilisateur spécifié
-                int totalColisLivres = await _context.Colis.CountAsync(c => c.ApplicationUserId == utilisateurId && c.StatutLivraison == "Livré");
-
-                return Ok(totalColisLivres);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
+      
         [HttpGet("paginated")]
         public async Task<ActionResult<PagedResult<Colis>>> GetColisPaginated(int pageNumber = 1, int pageSize = 10)
         {
@@ -866,6 +505,250 @@ namespace webApiProject.Controllers
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
         }
+
+
+
+
+        // GET: api/Colis/total-echange
+        [HttpGet("Get_Total_Colis_Echange")]
+        [Authorize] // Autoriser tous les utilisateurs authentifiés
+        public async Task<ActionResult<int>> GetTotalColisEchange()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var userId = await GetUserIdFromTokenAsync();
+
+                // Vérifier le rôle de l'utilisateur
+                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(userId));
+
+                if (roles.Contains("Admin") || roles.Contains("Assistante"))
+                {
+                    // Si l'utilisateur est Admin ou Assistante, compter tous les colis en échange
+                    int totalColisEchange = await _context.Colis.CountAsync(c => c.Echange);
+                    return Ok(totalColisEchange);
+                }
+                else if (roles.Contains("Fournisseur"))
+                {
+                    // Si l'utilisateur est Fournisseur, compter les colis en échange pour ce fournisseur
+                    int totalColisEchangeFournisseur = await _context.Colis.CountAsync(c => c.ApplicationUserId == userId && c.Echange);
+                    return Ok(totalColisEchangeFournisseur);
+                }
+
+                return Forbid("Accès interdit : rôle non autorisé.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+        // GET: api/Colis/colis-echange
+        [HttpGet("liste_colis_echange")]
+        public async Task<ActionResult<IEnumerable<Colis>>> GetColisEchange()
+        {
+            try
+            {
+                var colisEchangeList = await _context.Colis
+                    .Where(c => c.Echange)
+                    .ToListAsync();
+
+                if (colisEchangeList == null || !colisEchangeList.Any())
+                {
+                    return NotFound("Aucun colis trouvé avec l'échange activé.");
+                }
+
+                return Ok(colisEchangeList);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+        // GET: api/Colis/total-livres/{annee}/{mois}
+        [HttpGet("total_livres/{annee}/{mois}")]
+        public async Task<ActionResult<int>> GetTotalColisLivres(int annee, int mois)
+        {
+            try
+            {
+                // Vérification de la validité du mois
+                if (mois < 1 || mois > 12)
+                {
+                    return BadRequest("Le mois doit être compris entre 1 et 12.");
+                }
+
+                // Calcul des dates de début et de fin pour le mois donné
+                var dateDebut = new DateTime(annee, mois, 1);
+                var dateFin = dateDebut.AddMonths(1).AddDays(-1); // Dernier jour du mois
+
+                // Comptage des colis livrés dans le mois spécifié
+                int totalColisLivres = await _context.Colis
+                    .CountAsync(c => c.StatutLivraison == "Livré" && c.DateAjoutColis >= dateDebut && c.DateAjoutColis <= dateFin);
+
+                return Ok(totalColisLivres);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+        [HttpGet("Get_Total_Colis_En_Cours_De_Traitement")]
+        [Authorize] // Autoriser tous les utilisateurs authentifiés
+        public async Task<ActionResult<int>> GetTotalColisEnCoursDeTraitement()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var userId = await GetUserIdFromTokenAsync();
+
+                // Vérifier le rôle de l'utilisateur
+                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(userId));
+
+                if (roles.Contains("Admin") || roles.Contains("Assistante"))
+                {
+                    // Si l'utilisateur est Admin ou Assistante, compter tous les colis en cours de traitement
+                    int totalEnCours = await _context.Colis.CountAsync(c => c.StatutLivraison == "EnCoursDeTraitement");
+                    return Ok(totalEnCours);
+                }
+                else if (roles.Contains("Fournisseur"))
+                {
+                    // Si l'utilisateur est Fournisseur, compter les colis en cours de traitement pour ce fournisseur
+                    int totalEnCoursFournisseur = await _context.Colis.CountAsync(c => c.ApplicationUserId == userId && c.StatutLivraison == "EnCoursDeTraitement");
+                    return Ok(totalEnCoursFournisseur);
+                }
+
+                return Forbid("Accès interdit : rôle non autorisé.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+
+        // GET: api/Colis/annules
+        [HttpGet("Get_Total_Colis_Annules")]
+        [Authorize] // Autoriser tous les utilisateurs authentifiés
+        public async Task<ActionResult<int>> GetTotalColisAnnules()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var userId = await GetUserIdFromTokenAsync();
+
+                // Vérifier le rôle de l'utilisateur
+                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(userId));
+
+                if (roles.Contains("Admin") || roles.Contains("Assistante"))
+                {
+                    // Si l'utilisateur est Admin ou Assistante, compter tous les colis annulés
+                    int totalAnnules = await _context.Colis.CountAsync(c => c.StatutLivraison == "Annulé");
+                    return Ok(totalAnnules);
+                }
+                else if (roles.Contains("Fournisseur"))
+                {
+                    // Si l'utilisateur est Fournisseur, compter les colis annulés pour ce fournisseur
+                    int totalAnnulesFournisseur = await _context.Colis.CountAsync(c => c.ApplicationUserId == userId && c.StatutLivraison == "Annulé");
+                    return Ok(totalAnnulesFournisseur);
+                }
+
+                return Forbid("Accès interdit : rôle non autorisé.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+        [HttpGet("Get_Total_Colis_Livres")]
+        [Authorize] // Autoriser tous les utilisateurs authentifiés
+        public async Task<ActionResult<int>> GetTotalColisLivres()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var userId = await GetUserIdFromTokenAsync();
+
+                // Vérifier le rôle de l'utilisateur
+                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(userId));
+
+                if (roles.Contains("Admin") || roles.Contains("Assistante"))
+                {
+                    // Si l'utilisateur est Admin ou Assistante, compter tous les colis livrés
+                    int totalLivres = await _context.Colis.CountAsync(c => c.StatutLivraison == "Livré");
+                    return Ok(totalLivres);
+                }
+                else if (roles.Contains("Fournisseur"))
+                {
+                    // Si l'utilisateur est Fournisseur, compter les colis livrés pour ce fournisseur
+                    int totalLivresFournisseur = await _context.Colis.CountAsync(c => c.ApplicationUserId == userId && c.StatutLivraison == "Livré");
+                    return Ok(totalLivresFournisseur);
+                }
+
+                return Forbid("Accès interdit : rôle non autorisé.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+        // GET: api/Colis/liste
+        [HttpGet("mes-colis")]
+        [Authorize] // Autoriser tous les utilisateurs authentifiés
+        public async Task<ActionResult<IEnumerable<Colis>>> GetColisByRole()
+        {
+            try
+            {
+                // Récupérer l'ID de l'utilisateur à partir du token
+                var userId = await GetUserIdFromTokenAsync();
+
+                // Vérifier le rôle de l'utilisateur
+                var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(userId));
+
+                if (roles.Contains("Admin") || roles.Contains("Assistante"))
+                {
+                    // Si l'utilisateur est Admin ou Assistante, retourner tous les colis
+                    var colisList = await _context.Colis.ToListAsync();
+                    return Ok(colisList);
+                }
+                else if (roles.Contains("Fournisseur"))
+                {
+                    // Si l'utilisateur est Fournisseur, retourner les colis ajoutés par ce fournisseur
+                    var colisList = await _context.Colis
+                        .Where(c => c.ApplicationUserId == userId)
+                        .ToListAsync();
+
+                    if (colisList == null || !colisList.Any())
+                    {
+                        return NotFound("Aucun colis trouvé pour ce fournisseur.");
+                    }
+
+                    return Ok(colisList);
+                }
+
+                return Forbid("Accès interdit : rôle non autorisé.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur interne: {ex.Message}");
+            }
+        }
+
+        /** [HttpGet("GetTotalColisAnnulesByFournisseur/{fournisseurId}")]
+         public async Task<ActionResult<int>> GetTotalColisAnnulesByFournisseur(string fournisseurId)
+         {
+             try
+             {
+                 // Compter le nombre de colis annulés pour le fournisseur spécifié
+                 int totalAnnules = await _context.Colis.CountAsync(c => c.ApplicationUserId == fournisseurId && c.StatutLivraison == "Annulé");
+                 return Ok(totalAnnules);
+             }
+             catch (Exception ex)
+             {
+                 return StatusCode(500, $"Erreur interne: {ex.Message}");
+             }
+         }**/
+
     }
 }
     // GET: api/Colis
