@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using webApiProject;
@@ -7,9 +8,11 @@ public class Colis
 {
     [Key]
     public int Id { get; set; } // Identifiant unique du colis
-   // public int Cin { get; set; }
+    [JsonProperty(Required = Required.AllowNull)]
+    public string? Cin { get; set; }
     public int fraisLivraison { get; set; }
-   // public string matricule { get; set; }
+    [JsonProperty(Required = Required.AllowNull)]
+    public string? matricule { get; set; }
     public string NomComplet { get; set; } = string.Empty; // Nom complet du destinataire
     public string CodeGouvernorat { get; set; } = string.Empty; // Code du gouvernorat
     public string Delegation { get; set; } = string.Empty; // Délégation
@@ -22,7 +25,7 @@ public class Colis
     public string? Commentaire { get; set; } // Commentaires supplémentaires
     public string StatutLivraison { get; set; } = string.Empty; // Statut de livraison
     public bool Annulation { get; set; } // Indique si le colis a été annulée  
-    public DateTime DateAjoutColis { get; set; } // Date d'envoi du colis
+    public string DateAjoutColis { get; set; } // Date d'envoi du colis
     public string? ApplicationUserId { get; set; }
     // Clé étrangère pour le colis
    

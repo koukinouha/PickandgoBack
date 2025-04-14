@@ -35,13 +35,31 @@ namespace webApiProject.Controllers
         }
 
         [HttpPost("register")]
+      
         public async Task<IActionResult> Register(CreateUserModel model)
         {
             // Vérifier si l'e-mail existe déjà
-            var existingUser = await _userManager.FindByEmailAsync(model.Email);
-            if (existingUser != null)
+            var existingUserByEmail = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUserByEmail != null)
             {
-                return BadRequest("Cette adresse e-mail est déjà utilisée.");
+                return BadRequest(new { success = -3, message = "Cette adresse e-mail est déjà utilisée." });
+            }
+
+            // Vérifier si le nom d'utilisateur existe déjà
+            var existingUserByUsername = await _userManager.FindByNameAsync(model.Username);
+            if (existingUserByUsername != null)
+            {
+                return BadRequest(new { success = -5, message = "Ce nom d'utilisateur est déjà utilisé." });
+            }
+
+            // Vérifier si un utilisateur avec le rôle Admin existe déjà
+            if (model.Role == role.Admin)
+            {
+                var existingAdminUser = await _userManager.GetUsersInRoleAsync(role.Admin.ToString());
+                if (existingAdminUser.Any())
+                {
+                    return BadRequest(new { success = -2, message = "Un utilisateur avec le rôle Admin existe déjà." });
+                }
             }
 
             // Créer l'utilisateur
@@ -65,25 +83,23 @@ namespace webApiProject.Controllers
 
                 if (model.Role == role.Admin)
                 {
-                    // Envoyer un e-mail de confirmation pour les admins
                     await SendAdminConfirmationEmail(model.Email, model.Username, model.Password);
                 }
                 else if (model.Role == role.Fournisseur)
                 {
-                    // Envoyer un e-mail à l'administrateur pour informer de la demande d'inscription
                     await SendAdminNotificationEmail(model.Email, model.Username);
                 }
                 else if (model.Role == role.Assistante)
                 {
-                    // Envoyer un e-mail de confirmation pour les clients
                     await SendClientConfirmationEmail(model.Email);
                 }
 
-                return Ok("User registered successfully.");
+                return Ok(new { success = 1, message = "Utilisateur enregistré avec succès." });
             }
 
-            return BadRequest(result.Errors);
+            return BadRequest(new { success = -1, message = string.Join(", ", result.Errors.Select(e => e.Description)) });
         }
+
 
         [HttpPost("validateSupplier/{userId}")]
         [Authorize(Roles = "Admin , Assistante")]
@@ -313,26 +329,27 @@ namespace webApiProject.Controllers
                 var user = await _userManager.FindByIdAsync(userId);
                 if (user == null)
                 {
-                    return NotFound("L'utilisateur spécifié n'a pas été trouvé.");
+                    return NotFound(new { succes = -1, message = "L'utilisateur spécifié n'a pas été trouvé." });
                 }
 
                 var result = await _userManager.DeleteAsync(user);
                 if (result.Succeeded)
                 {
-                    return Ok("L'utilisateur a été supprimé avec succès.");
+                    return Ok(new { succes = 1, message = "L'utilisateur a été supprimé avec succès." });
                 }
                 else
                 {
-                    return BadRequest("La suppression de l'utilisateur a échoué.");
+                    return BadRequest(new { succes = -1, message = "La suppression de l'utilisateur a échoué." });
                 }
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Une erreur s'est produite lors de la suppression de l'utilisateur : {ex.Message}");
+                return StatusCode(500, new { succes = -1, message = $"Une erreur s'est produite lors de la suppression de l'utilisateur : {ex.Message}" });
             }
         }
 
-       
+
+
         [HttpPost("forgotPassword")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordModel model)
         {

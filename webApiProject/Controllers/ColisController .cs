@@ -56,20 +56,7 @@ namespace webApiProject.Controllers
         }
 
         // GET: api/Colis/filtrer/dateajout/{dateAjout}
-        [HttpGet("filtrer/dateajout/{dateAjout}")]
-        public async Task<ActionResult<IEnumerable<Colis>>> GetColisByDateAjout(DateTime dateAjout)
-        {
-            var colisList = await _context.Colis
-                .Where(c => c.DateAjoutColis.Date == dateAjout.Date)
-                .ToListAsync();
-
-            if (colisList == null || !colisList.Any())
-            {
-                return NotFound("Aucun colis trouvé pour cette date d'ajout.");
-            }
-
-            return Ok(colisList);
-        }
+        
         // GET: api/Colis/total
      
 
@@ -93,7 +80,7 @@ namespace webApiProject.Controllers
             return colis;
         }
         [HttpPost("ajouter")]
-        [Authorize(Roles = "Fournisseur")]
+        [Authorize(Roles = "Fournisseur , Admin")]
         public async Task<IActionResult> AjouterColis([FromBody] Colis colis)
         {
             if (colis == null)
@@ -113,7 +100,7 @@ namespace webApiProject.Controllers
                 var userId = await GetUserIdFromTokenAsync();
                 colis.ApplicationUserId = userId; // Assigner l'ID de l'utilisateur
 
-                colis.DateAjoutColis = DateTime.UtcNow;
+               
                 colis.StatutLivraison = "EnCoursDeTraitement"; // Définir le statut de livraison
 
                 _context.Colis.Add(colis);
@@ -171,7 +158,7 @@ namespace webApiProject.Controllers
 
         [HttpPut("ModifierStatutLivraison/{colisId}")]
         [Authorize(Roles = "Admin,Assistante")]
-        public async Task<IActionResult> ModifierStatutLivraison(int colisId, [FromBody] string nouveauStatut)
+        public async Task<IActionResult> ModifierStatutLivraison(int colisId, [FromBody] Dictionary<string, string> request)
         {
             try
             {
@@ -182,28 +169,36 @@ namespace webApiProject.Controllers
                 var roles = await _userManager.GetRolesAsync(await _userManager.FindByIdAsync(userId));
                 if (!roles.Contains("Admin") && !roles.Contains("Assistante"))
                 {
-                    return Forbid("Accès interdit : seuls les administrateurs et les assistantes peuvent modifier le statut de livraison.");
+                    return Ok(new { success = -1, message = "Accès interdit : seuls les administrateurs et les assistantes peuvent modifier le statut de livraison." });
                 }
 
                 // Récupérer le colis à modifier
                 var colis = await _context.Colis.FindAsync(colisId);
                 if (colis == null)
                 {
-                    return NotFound($"Le colis avec l'ID {colisId} n'a pas été trouvé.");
+                    return Ok(new { success = -1, message = $"Le colis avec l'ID {colisId} n'a pas été trouvé." });
+                }
+
+                // Vérifier si le statut de livraison est présent dans le dictionnaire
+                if (!request.ContainsKey("statutLivraison"))
+                {
+                    return Ok(new { success = -1, message = "Le statut de livraison est requis." });
                 }
 
                 // Mettre à jour le statut de livraison
-                colis.StatutLivraison = nouveauStatut;
+                colis.StatutLivraison = request["statutLivraison"];
                 _context.Colis.Update(colis);
                 await _context.SaveChangesAsync();
 
-                return Ok($"Le statut de livraison du colis {colisId} a été mis à jour avec le nouveau statut : {nouveauStatut}.");
+                return Ok(new { success = 1, message = $"Le statut de livraison du colis {colisId} a été mis à jour avec le nouveau statut : {colis.StatutLivraison}." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
+                return Ok(new { success = -1, message = $"Erreur interne: {ex.Message}" });
             }
         }
+
+
 
 
         [HttpGet("Get_Total_Colis_Annule_Nombre")]
@@ -302,7 +297,7 @@ namespace webApiProject.Controllers
 
 
         [HttpPost("ajouter_colis_liste")]
-        [Authorize(Roles = "Fournisseur")]
+        [Authorize(Roles = "Fournisseur , Admin")]
         public async Task<IActionResult> AjouterColisliste([FromBody] Colis[] colis)
         {
             if (colis == null || colis.Length == 0)
@@ -316,7 +311,7 @@ namespace webApiProject.Controllers
             foreach (Colis col in colis)
             {
                 col.ApplicationUserId = userId; // Assigner l'ID de l'utilisateur
-                col.DateAjoutColis = DateTime.UtcNow;
+               
 
                 try
                 {
@@ -565,33 +560,7 @@ namespace webApiProject.Controllers
                 return StatusCode(500, $"Erreur interne: {ex.Message}");
             }
         }
-        // GET: api/Colis/total-livres/{annee}/{mois}
-        [HttpGet("total_livres/{annee}/{mois}")]
-        public async Task<ActionResult<int>> GetTotalColisLivres(int annee, int mois)
-        {
-            try
-            {
-                // Vérification de la validité du mois
-                if (mois < 1 || mois > 12)
-                {
-                    return BadRequest("Le mois doit être compris entre 1 et 12.");
-                }
-
-                // Calcul des dates de début et de fin pour le mois donné
-                var dateDebut = new DateTime(annee, mois, 1);
-                var dateFin = dateDebut.AddMonths(1).AddDays(-1); // Dernier jour du mois
-
-                // Comptage des colis livrés dans le mois spécifié
-                int totalColisLivres = await _context.Colis
-                    .CountAsync(c => c.StatutLivraison == "Livré" && c.DateAjoutColis >= dateDebut && c.DateAjoutColis <= dateFin);
-
-                return Ok(totalColisLivres);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Erreur interne: {ex.Message}");
-            }
-        }
+       
         [HttpGet("Get_Total_Colis_En_Cours_De_Traitement")]
         [Authorize] // Autoriser tous les utilisateurs authentifiés
         public async Task<ActionResult<int>> GetTotalColisEnCoursDeTraitement()

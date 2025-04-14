@@ -20,11 +20,11 @@ namespace webApiProject.EmailConfiguration
                     client.EnableSsl = true;
                     client.DeliveryMethod = SmtpDeliveryMethod.Network;
                     client.UseDefaultCredentials = false;
-                    client.Credentials = new NetworkCredential("nouhe.kouki.1999@gmail.com", "oxqe nmhi bhln xpuo");
+                    client.Credentials = new NetworkCredential("contact.pgpickandgo@gmail.com", "ugsg xapj pyoo iewa");
 
                     using (MailMessage mailMessage = new MailMessage())
                     {
-                        mailMessage.From = new MailAddress("nouhe.kouki.1999@gmail.com");
+                        mailMessage.From = new MailAddress("contact.pgpickandgo@gmail.com");
                         mailMessage.To.Add(email);
                         mailMessage.Subject = subject;
                         mailMessage.Body = message;
